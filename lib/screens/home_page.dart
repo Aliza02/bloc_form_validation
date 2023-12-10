@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:form_validation_block/screens/bloc/signin_bloc.dart';
 import 'package:form_validation_block/screens/bloc/signin_events.dart';
 import 'package:form_validation_block/screens/bloc/signin_states.dart';
+import 'package:form_validation_block/screens/cubit/signin_cubit.dart';
 
 class HomePage extends StatelessWidget {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  // SigninEvents signin = SigninEvents();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +25,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            BlocBuilder<signInBloc, signinStates>(builder: (context, state) {
+            BlocBuilder<signinCubit, signinStates>(builder: (context, state) {
               if (state is inValidState) {
                 return Text(state.error);
               } else {
@@ -30,10 +33,9 @@ class HomePage extends StatelessWidget {
               }
             }),
             TextFormField(
-              controller: email,
+              controller: SigninEvents.email,
               onChanged: (val) {
-                BlocProvider.of<signInBloc>(context)
-                    .add(signInTextChanged(email.text, password.text));
+                SigninEvents.email.text = val;
               },
               decoration: const InputDecoration(
                 labelText: 'Username',
@@ -41,17 +43,16 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: password,
+              controller: SigninEvents.password,
               onChanged: (val) {
-                BlocProvider.of<signInBloc>(context)
-                    .add(signInTextChanged(email.text, password.text));
+                SigninEvents.password.text = val;
               },
               decoration: const InputDecoration(
                 labelText: 'Password',
               ),
             ),
             const SizedBox(height: 16),
-            BlocBuilder<signInBloc, signinStates>(
+            BlocBuilder<signinCubit, signinStates>(
               builder: (context, state) {
                 if (state is loadingState) {
                   return const CircularProgressIndicator();
@@ -59,8 +60,11 @@ class HomePage extends StatelessWidget {
                 return ElevatedButton(
                   onPressed: () {
                     if (state is validState) {
-                      BlocProvider.of<signInBloc>(context)
-                          .add(signInSubmitEvent(email.text, password.text));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Login Successful'),
+                        ),
+                      );
                     }
                   },
                   child: const Text('Sign In'),
